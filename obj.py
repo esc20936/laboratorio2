@@ -11,7 +11,6 @@ class Obj(object):
 
         for line in self.lines:
             try:
-                line = line.strip()
                 prefix, value = line.split(' ', 1)
             except:
                 continue
@@ -23,16 +22,7 @@ class Obj(object):
             elif prefix == 'vn':
                 self.normals.append( list(map(float, value.split(' '))))
             elif prefix == 'f':
-                vertList = []
-                for vert in value.split(' '):
-                   indices = vert.split('/')
-                   for x in range(0,len(indices)):
-                        if indices[x] == '':
-                            indices[x]=0
-                   indices = map(int, indices)
-                   indices = list(indices)
-                   vertList.append(indices)
-                self.faces.append(vertList)
+                self.faces.append([  list(map(int, vert.split('/'))) for vert in value.split(' ')] )
 
        
 

@@ -213,8 +213,6 @@ class Renderer(object):
         v = V4(vertex[0], vertex[1], vertex[2], 1)
         vt = self.viewportMatrix @ self.projectionMatrix @ self.viewMatrix @ v
         vt = vt.tolist()[0]
-        if vt[3] == 0:
-            vt[3]=0.01
         vf = V3(vt[0] / vt[3],
                 vt[1] / vt[3],
                 vt[2] / vt[3])
@@ -238,7 +236,6 @@ class Renderer(object):
             v1 = self.glTransform(v1, modelMatrix)
             v2 = self.glTransform(v2, modelMatrix)
 
-        
             A = self.glCamTransform(v0)
             B = self.glCamTransform(v1)
             C = self.glCamTransform(v2)
