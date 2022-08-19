@@ -1,5 +1,6 @@
 import numpy as np
-
+import random 
+import math
 def flat(render, **kwargs):
     # Normal calculada por poligono
     u, v, w = kwargs["baryCoords"]
@@ -73,6 +74,126 @@ def gourad(render, **kwargs):
     else:
         return 0,0,0
 
+def negative(render, **kwargs):
+    # Normal calculada por vertice
+    u, v, w = kwargs["baryCoords"]
+    b, g, r = kwargs["vColor"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+
+    b /= 255
+    g /= 255
+    r /= 255
+
+    if render.active_texture:
+        # P = Au + Bv + Cw
+        tU = tA[0] * u + tB[0] * v + tC[0] * w
+        tV = tA[1] * u + tB[1] * v + tC[1] * w
+
+        texColor = render.active_texture.getColor(tU, tV)
+
+        b *= texColor[2]
+        g *= texColor[1]
+        r *= texColor[0]
+
+    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+                               nA[1] * u + nB[1] * v + nC[1] * w,
+                               nA[2] * u + nB[2] * v + nC[2] * w])
+
+    dirLight = np.array(render.dirLight)
+    intensity = np.dot(triangleNormal, -dirLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    # inverse color (negative)
+    # print(b, g, r)
+    b = 1 - b
+    g = 1 - g
+    r = 1 - r
+
+
+
+    if intensity > 0:
+        return r, g, b
+    else:
+        return 1,1,1
+
+
+def sinFun(render, **kwargs):
+    u, v, w = kwargs["baryCoords"]
+    b, g, r = kwargs["vColor"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+
+    # b /= 255
+    g /= 255
+    # r /= 255
+
+    if render.active_texture:
+        # P = Au + Bv + Cw
+        tU = tA[0] * u + tB[0] * v + tC[0] * w
+        tV = tA[1] * u + tB[1] * v + tC[1] * w
+
+        texColor = render.active_texture.getColor(tU, tV)
+
+        b *= texColor[2]
+        g *= texColor[1]
+        r *= texColor[0]
+
+    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+                               nA[1] * u + nB[1] * v + nC[1] * w,
+                               nA[2] * u + nB[2] * v + nC[2] * w])
+
+    dirLight = np.array(render.dirLight)
+    intensity = np.dot(triangleNormal, -dirLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        return math.sin(math.radians(r))/2 + 0.5, g, math.sin(math.radians(b))/2 + 0.5
+    else:
+        return 0,0,0
+
+def randomBlue(render, **kwargs):
+    u, v, w = kwargs["baryCoords"]
+    b, g, r = kwargs["vColor"]
+    tA, tB, tC = kwargs["texCoords"]
+    nA, nB, nC = kwargs["normals"]
+
+    # b /= 255
+    g /= 255
+    r /= 255
+
+    if render.active_texture:
+        # P = Au + Bv + Cw
+        tU = tA[0] * u + tB[0] * v + tC[0] * w
+        tV = tA[1] * u + tB[1] * v + tC[1] * w
+
+        texColor = render.active_texture.getColor(tU, tV)
+
+        b *= texColor[2]
+        g *= texColor[1]
+        r *= texColor[0]
+
+    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+                               nA[1] * u + nB[1] * v + nC[1] * w,
+                               nA[2] * u + nB[2] * v + nC[2] * w])
+
+    dirLight = np.array(render.dirLight)
+    intensity = np.dot(triangleNormal, -dirLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
+
+    if intensity > 0:
+        return r , random.random(), random.random()
+    else:
+        return 0,0,0
 
 def unlit(render, **kwargs):
     u, v, w = kwargs["baryCoords"]
@@ -255,22 +376,26 @@ def textureBlend(render, **kwargs):
 
     return r, g, b
 
-def prueba(render, **kwargs):
-
+def normalMap(render, **kwargs):
+    # Normal calculada por vertice
     u, v, w = kwargs["baryCoords"]
     b, g, r = kwargs["vColor"]
     tA, tB, tC = kwargs["texCoords"]
     nA, nB, nC = kwargs["normals"]
+    tangent = kwargs["tangent"]
+    bitangent = kwargs["bitangent"]
+
+    
 
     b /= 255
     g /= 255
     r /= 255
 
-    if render.active_texture:
-        # P = Au + Bv + Cw
-        tU = tA[0] * u + tB[0] * v + tC[0] * w
-        tV = tA[1] * u + tB[1] * v + tC[1] * w
+    # P = Au + Bv + Cw
+    tU = tA[0] * u + tB[0] * v + tC[0] * w
+    tV = tA[1] * u + tB[1] * v + tC[1] * w
 
+    if render.active_texture:
         texColor = render.active_texture.getColor(tU, tV)
 
         b *= texColor[2]
@@ -282,24 +407,29 @@ def prueba(render, **kwargs):
                                nA[2] * u + nB[2] * v + nC[2] * w])
 
     dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
 
-    yellow = (1,1,0)
-    red = (1,0,0)
-    blue = (0,0,1)
+    if render.normal_map:
+        texNormal = render.normal_map.getColor(tU, tV)
+        texNormal = [texNormal[0] * 2 - 1,
+                     texNormal[1] * 2 - 1,
+                     texNormal[2] * 2 - 1]
+        texNormal = texNormal / np.linalg.norm(texNormal)
 
+        tangentMatrix = np.matrix([[tangent[0],bitangent[0],triangleNormal[0]],
+                                   [tangent[1],bitangent[1],triangleNormal[1]],
+                                   [tangent[2],bitangent[2],triangleNormal[2]]])
 
-    
-    if intensity < 0.5:
-        intensity = 0.4
-    elif intensity < 0.8:
-        intensity = 0.7
-    elif intensity <= 1:
-        intensity = 1
+        texNormal = tangentMatrix @ texNormal
+        texNormal = texNormal.tolist()[0]
+        texNormal = texNormal / np.linalg.norm(texNormal)
 
-    b *= (intensity * blue[2])
-    g *= ( intensity * yellow[1])
-    r *=  ( intensity * red[0])
+        intensity = np.dot(texNormal, -dirLight)
+    else:
+        intensity = np.dot(triangleNormal, -dirLight)
+
+    b *= intensity
+    g *= intensity
+    r *= intensity
 
     if intensity > 0:
         return r, g, b
