@@ -1,7 +1,8 @@
 import struct
 from collections import namedtuple
+from tkinter import E
 import numpy as np
-
+import Math as customMath
 from math import cos, sin, tan, pi
 
 import random
@@ -77,44 +78,49 @@ class Renderer(object):
         self.vpWidth = width
         self.vpHeight = height
 
-        self.viewportMatrix = np.matrix([[width/2,0,0,posX+width/2],
+        self.viewportMatrix = [[width/2,0,0,posX+width/2],
                                          [0,height/2,0,posY+height/2],
                                          [0,0,0.5,0.5],
-                                         [0,0,0,1]])
+                                         [0,0,0,1]]
+
+       
 
         self.glProjectionMatrix()
 
     def glViewMatrix(self, translate = V3(0,0,0), rotate = V3(0,0,0)):
         self.camMatrix = self.glCreateObjectMatrix(translate, rotate)
-        self.viewMatrix = np.linalg.inv(self.camMatrix)
+       
+        self.viewMatrix = customMath.getMatrixInverse(self.camMatrix)
+        
 
-    def glLookAt(self, eye, camPosition = V3(0,0,0)):
-        forward = np.subtract(camPosition, eye)
-        forward = forward / np.linalg.norm(forward)
+    # def glLookAt(self, eye, camPosition = V3(0,0,0)):
+    #     print(camPosition)
+    #     print(eye)
+    #     forward = np.subtract(camPosition, eye)
+    #     forward = forward / np.linalg.norm(forward)
 
-        right = np.cross(V3(0,1,0), forward)
-        right = right / np.linalg.norm(right)
+    #     right = np.cross(V3(0,1,0), forward)
+    #     right = right / np.linalg.norm(right)
 
-        up = np.cross(forward, right)
-        up = up / np.linalg.norm(up)
+    #     up = np.cross(forward, right)
+    #     up = up / np.linalg.norm(up)
 
-        self.camMatrix = np.matrix([[right[0],up[0],forward[0],camPosition[0]],
-                                    [right[1],up[1],forward[1],camPosition[1]],
-                                    [right[2],up[2],forward[2],camPosition[2]],
-                                    [0,0,0,1]])
+    #     self.camMatrix = np.matrix([[right[0],up[0],forward[0],camPosition[0]],
+    #                                 [right[1],up[1],forward[1],camPosition[1]],
+    #                                 [right[2],up[2],forward[2],camPosition[2]],
+    #                                 [0,0,0,1]])
 
-        self.viewMatrix = np.linalg.inv(self.camMatrix)
+    #     self.viewMatrix = np.linalg.inv(self.camMatrix)
 
     def glProjectionMatrix(self, n = 0.1, f = 1000, fov = 60):
         aspectRatio = self.vpWidth / self.vpHeight
         t = tan( (fov * pi / 180) / 2) * n
         r = t * aspectRatio
 
-        self.projectionMatrix = np.matrix([[n/r,0,0,0],
+        self.projectionMatrix = [[n/r,0,0,0],
                                            [0,n/t,0,0],
                                            [0,0,-(f+n)/(f-n),-(2*f*n)/(f-n)],
-                                           [0,0,-1,0]])
-
+                                           [0,0,-1,0]]
 
 
     def glClearColor(self, r, g, b):
@@ -172,60 +178,59 @@ class Renderer(object):
         self.glPoint(x,y,clr)
 
 
-    def glCreateRotationMatrix(self, pitch = 0, yaw = 0, roll = 0):
-        
-        pitch *= pi/180
-        yaw   *= pi/180
-        roll  *= pi/180
+    def glCreateRotationMatrix(self,rotate = V3(0,0,0)):
+        rx = [[1,0,0,0],
+                        [0,np.cos(np.radians(rotate.x)),-np.sin(np.radians(rotate.x)),0],
+                        [0,np.sin(np.radians(rotate.x)),np.cos(np.radians(rotate.x)),0],
+                        [0,0,0,1]]
 
-        pitchMat = np.matrix([[1, 0, 0, 0],
-                              [0, cos(pitch),-sin(pitch), 0],
-                              [0, sin(pitch), cos(pitch), 0],
-                              [0, 0, 0, 1]])
+        ry = [[np.cos(np.radians(rotate.y)),0,np.sin(np.radians(rotate.y)),0],
+                        [0,1,0,0],
+                        [-np.sin(np.radians(rotate.y)),0,np.cos(np.radians(rotate.y)),0],
+                        [0,0,0,1]]
 
-        yawMat = np.matrix([[cos(yaw), 0, sin(yaw), 0],
-                            [0, 1, 0, 0],
-                            [-sin(yaw), 0, cos(yaw), 0],
-                            [0, 0, 0, 1]])
+        rz = [[np.cos(np.radians(rotate.z)),-np.sin(np.radians(rotate.z)),0,0],
+                        [np.sin(np.radians(rotate.z)),np.cos(np.radians(rotate.z)),0,0],
+                        [0,0,1,0],
+                        [0,0,0,1]]
 
-        rollMat = np.matrix([[cos(roll),-sin(roll), 0, 0],
-                             [sin(roll), cos(roll), 0, 0],
-                             [0, 0, 1, 0],
-                             [0, 0, 0, 1]])
-
-        return pitchMat * yawMat * rollMat
-
-
+        a1 = customMath.multiply_matrix(rx,ry)
+        rotation = customMath.multiply_matrix(a1,rz)
+        return rotation
+    
     def glCreateObjectMatrix(self, translate = V3(0,0,0), rotate = V3(0,0,0), scale = V3(1,1,1)):
 
-        translation = np.matrix([[1, 0, 0, translate.x],
+        translation = [[1, 0, 0, translate.x],
                                  [0, 1, 0, translate.y],
                                  [0, 0, 1, translate.z],
-                                 [0, 0, 0, 1]])
+                                 [0, 0, 0, 1]]
 
-        rotation = self.glCreateRotationMatrix(rotate.x, rotate.y, rotate.z)
+        rotation = self.glCreateRotationMatrix(rotate)
 
-        scaleMat = np.matrix([[scale.x, 0, 0, 0],
+        scaleMat = [[scale.x, 0, 0, 0],
                               [0, scale.y, 0, 0],
                               [0, 0, scale.z, 0],
-                              [0, 0, 0, 1]])
+                              [0, 0, 0, 1]]
 
-        return translation * rotation * scaleMat
+        pre = customMath.multiply_matrix(translation,rotation)
+        post = customMath.multiply_matrix(pre,scaleMat)
+
+        return post
 
     def glTransform(self, vertex, matrix):
-        v = V4(vertex[0], vertex[1], vertex[2], 1)
-        vt = matrix @ v
-        vt = vt.tolist()[0]
+
+        v = [vertex[0], vertex[1], vertex[2], 1]
+        vt = customMath.multiply_matrix_vector(matrix,v)
         vf = V3(vt[0] / vt[3],
                 vt[1] / vt[3],
                 vt[2] / vt[3])
 
         return vf
 
+
     def glDirTransform(self, dirVector, rotMatrix):
-        v = V4(dirVector[0], dirVector[1], dirVector[2], 0)
-        vt = rotMatrix @ v
-        vt = vt.tolist()[0]
+        v = [dirVector[0], dirVector[1], dirVector[2], 0]
+        vt = customMath.multiply_matrix_vector(rotMatrix,v)
         vf = V3(vt[0],
                 vt[1],
                 vt[2])
@@ -233,9 +238,10 @@ class Renderer(object):
         return vf
 
     def glCamTransform(self, vertex):
-        v = V4(vertex[0], vertex[1], vertex[2], 1)
-        vt = self.viewportMatrix @ self.projectionMatrix @ self.viewMatrix @ v
-        vt = vt.tolist()[0]
+        v = [vertex[0], vertex[1], vertex[2], 1]
+        vt = customMath.multiply_matrix(self.viewportMatrix,self.projectionMatrix)
+        vt = customMath.multiply_matrix(vt,self.viewMatrix)
+        vt = customMath.multiply_matrix_vector(vt,v)
         vf = V3(vt[0] / vt[3],
                 vt[1] / vt[3],
                 vt[2] / vt[3])
@@ -246,7 +252,7 @@ class Renderer(object):
     def glLoadModel(self, filename, translate = V3(0,0,0), rotate = V3(0,0,0), scale = V3(1,1,1)):
         model = Obj(filename)
         modelMatrix = self.glCreateObjectMatrix(translate, rotate, scale)
-        rotationMatrix = self.glCreateRotationMatrix(rotate[0], rotate[1], rotate[2])
+        rotationMatrix = self.glCreateRotationMatrix(rotate)
 
         for face in model.faces:
             vertCount = len(face)
@@ -416,23 +422,40 @@ class Renderer(object):
         maxX = round(max(A.x, B.x, C.x))
         maxY = round(max(A.y, B.y, C.y))
 
-        edge1 = np.subtract(verts[1], verts[0])
-        edge2 = np.subtract(verts[2], verts[0])
+        edgea = customMath.matrix_substract([[verts[1].x, verts[1].y, verts[1].z]],[ [verts[0].x, verts[0].y, verts[0].z]])
+        edgeb = customMath.matrix_substract([[verts[2].x, verts[2].y, verts[2].z]],[ [verts[0].x, verts[0].y, verts[0].z]])
+      
+        edge1= edgea[0]
+        edge2 = edgeb[0]
+        # triangleNormal = np.cross( edge1, edge2)
+        triangleNormala = customMath.cross_product(edge1,edge2)
 
-        triangleNormal = np.cross( edge1, edge2)
-        triangleNormal = triangleNormal / np.linalg.norm(triangleNormal)
+        # print(triangleNormal)
+        # print(triangleNormala)
+        maxV = max(triangleNormala)
+        for i in range(len(triangleNormala)):
+            triangleNormala[i] /= maxV
 
-        deltaUV1 = np.subtract(texCoords[1], texCoords[0])
-        deltaUV2 = np.subtract(texCoords[2], texCoords[0])
+        deltaUV1 = customMath.matrix_substract([texCoords[1]], [texCoords[0]])
+        deltaUV2 = customMath.matrix_substract([texCoords[2]], [texCoords[0]])
+        deltaUV1 = deltaUV1[0]
+        deltaUV2 = deltaUV2[0]
         f = 1 / (deltaUV1[0]* deltaUV2[1] - deltaUV2[0] * deltaUV1[1])
 
         tangent = [f * (deltaUV2[1] * edge1[0] - deltaUV1[1] * edge2[0]),
                    f * (deltaUV2[1] * edge1[1] - deltaUV1[1] * edge2[1]),
                    f * (deltaUV2[1] * edge1[2] - deltaUV1[1] * edge2[2])]
-        tangent = tangent / np.linalg.norm(tangent)
+        maxT = max(tangent)
+        for i in range(len(tangent)):
+            tangent[i] /= maxT
 
-        bitangent = np.cross(triangleNormal, tangent)
-        bitangent = bitangent / np.linalg.norm(bitangent)
+        bitangent = customMath.cross_product(triangleNormala,tangent)
+
+        maxB = max(bitangent)
+        for i in range(len(bitangent)):
+            bitangent[i] /= maxB
+
+
 
         for x in range(minX, maxX + 1):
             for y in range(minY, maxY + 1):
@@ -454,7 +477,7 @@ class Renderer(object):
                                                              vColor = clr or self.currColor,
                                                              texCoords = texCoords,
                                                              normals = normals,
-                                                             triangleNormal = triangleNormal,
+                                                             triangleNormal = triangleNormala,
                                                              tangent = tangent,
                                                              bitangent = bitangent)
 

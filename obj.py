@@ -1,4 +1,3 @@
-import numpy as np
 class Obj(object):
     def __init__(self, filename):
         with open(filename, "r") as file:
@@ -9,6 +8,7 @@ class Obj(object):
         self.normals = []
         self.faces = []
         maxValue = 0
+        
         for line in self.lines:
             try:
                 prefix, value = line.split(' ', 1)
