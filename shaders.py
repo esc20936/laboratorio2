@@ -1,6 +1,7 @@
 import numpy as np
 import random 
 import math
+import Math as customMath
 def flat(render, **kwargs):
     # Normal calculada por poligono
     u, v, w = kwargs["baryCoords"]
@@ -23,13 +24,15 @@ def flat(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    
+    
+    intensity = np.dot(triangleNormal, customMath.negative_vector(dirLight))
 
     b *= intensity
     g *= intensity
     r *= intensity
-
+    print(r,g,b)
     if intensity > 0:
         return r, g, b
     else:
@@ -58,16 +61,17 @@ def gourad(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
 
     b *= intensity
     g *= intensity
     r *= intensity
+    
 
     if intensity > 0:
         return r, g, b
@@ -96,12 +100,12 @@ def negative(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
 
     b *= intensity
     g *= intensity
@@ -142,12 +146,12 @@ def sinFun(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
 
     b *= intensity
     g *= intensity
@@ -179,17 +183,16 @@ def randomBlue(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
 
     b *= intensity
     g *= intensity
     r *= intensity
-
     if intensity > 0:
         return r , random.random(), random.random()
     else:
@@ -240,12 +243,13 @@ def toon(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
+
 
     if intensity < 0.2:
         intensity = 0.1
@@ -288,12 +292,13 @@ def glow(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
+
 
     b *= intensity
     g *= intensity
@@ -345,12 +350,13 @@ def textureBlend(render, **kwargs):
         g *= texColor[1]
         r *= texColor[0]
 
-    triangleNormal = np.array([nA[0] * u + nB[0] * v + nC[0] * w,
+    triangleNormal = [nA[0] * u + nB[0] * v + nC[0] * w,
                                nA[1] * u + nB[1] * v + nC[1] * w,
-                               nA[2] * u + nB[2] * v + nC[2] * w])
+                               nA[2] * u + nB[2] * v + nC[2] * w]
 
-    dirLight = np.array(render.dirLight)
-    intensity = np.dot(triangleNormal, -dirLight)
+    dirLight = [render.dirLight.x, render.dirLight.y, render.dirLight.z]
+    intensity = customMath.dot_product(triangleNormal, customMath.negative_vector(dirLight))
+
 
     b *= intensity
     g *= intensity

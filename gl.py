@@ -1,9 +1,8 @@
 import struct
 from collections import namedtuple
 from tkinter import E
-import numpy as np
 import Math as customMath
-from math import cos, sin, tan, pi
+import math
 
 import random
 
@@ -93,28 +92,11 @@ class Renderer(object):
         self.viewMatrix = customMath.getMatrixInverse(self.camMatrix)
         
 
-    # def glLookAt(self, eye, camPosition = V3(0,0,0)):
-    #     print(camPosition)
-    #     print(eye)
-    #     forward = np.subtract(camPosition, eye)
-    #     forward = forward / np.linalg.norm(forward)
-
-    #     right = np.cross(V3(0,1,0), forward)
-    #     right = right / np.linalg.norm(right)
-
-    #     up = np.cross(forward, right)
-    #     up = up / np.linalg.norm(up)
-
-    #     self.camMatrix = np.matrix([[right[0],up[0],forward[0],camPosition[0]],
-    #                                 [right[1],up[1],forward[1],camPosition[1]],
-    #                                 [right[2],up[2],forward[2],camPosition[2]],
-    #                                 [0,0,0,1]])
-
-    #     self.viewMatrix = np.linalg.inv(self.camMatrix)
+   
 
     def glProjectionMatrix(self, n = 0.1, f = 1000, fov = 60):
         aspectRatio = self.vpWidth / self.vpHeight
-        t = tan( (fov * pi / 180) / 2) * n
+        t = math.tan( (fov * math.pi / 180) / 2) * n
         r = t * aspectRatio
 
         self.projectionMatrix = [[n/r,0,0,0],
@@ -180,17 +162,17 @@ class Renderer(object):
 
     def glCreateRotationMatrix(self,rotate = V3(0,0,0)):
         rx = [[1,0,0,0],
-                        [0,np.cos(np.radians(rotate.x)),-np.sin(np.radians(rotate.x)),0],
-                        [0,np.sin(np.radians(rotate.x)),np.cos(np.radians(rotate.x)),0],
+                        [0,math.cos(math.radians(rotate.x)),-math.sin(math.radians(rotate.x)),0],
+                        [0,math.sin(math.radians(rotate.x)),math.cos(math.radians(rotate.x)),0],
                         [0,0,0,1]]
 
-        ry = [[np.cos(np.radians(rotate.y)),0,np.sin(np.radians(rotate.y)),0],
+        ry = [[math.cos(math.radians(rotate.y)),0,math.sin(math.radians(rotate.y)),0],
                         [0,1,0,0],
-                        [-np.sin(np.radians(rotate.y)),0,np.cos(np.radians(rotate.y)),0],
+                        [-math.sin(math.radians(rotate.y)),0,math.cos(math.radians(rotate.y)),0],
                         [0,0,0,1]]
 
-        rz = [[np.cos(np.radians(rotate.z)),-np.sin(np.radians(rotate.z)),0,0],
-                        [np.sin(np.radians(rotate.z)),np.cos(np.radians(rotate.z)),0,0],
+        rz = [[math.cos(math.radians(rotate.z)),-math.sin(math.radians(rotate.z)),0,0],
+                        [math.sin(math.radians(rotate.z)),math.cos(math.radians(rotate.z)),0,0],
                         [0,0,1,0],
                         [0,0,0,1]]
 
@@ -427,7 +409,6 @@ class Renderer(object):
       
         edge1= edgea[0]
         edge2 = edgeb[0]
-        # triangleNormal = np.cross( edge1, edge2)
         triangleNormala = customMath.cross_product(edge1,edge2)
 
         # print(triangleNormal)

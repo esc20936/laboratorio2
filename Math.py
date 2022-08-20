@@ -92,3 +92,12 @@ def cross_product(v1, v2):
     return [v1[1]*v2[2] - v1[2]*v2[1],
             v1[2]*v2[0] - v1[0]*v2[2],
             v1[0]*v2[1] - v1[1]*v2[0]]
+
+def negative_vector(v):
+    r = []
+    for x in v:
+        r.append(-x)
+    return r
+
+def dot_product(a, b):
+    return sum([i*j for (i, j) in zip(a, b)])   
